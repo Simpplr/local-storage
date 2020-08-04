@@ -1,15 +1,15 @@
 import {
+  EVENT_NAME,
   writeStorage,
   deleteFromStorage,
-  LocalStorageChanged,
-  isTypeOfLocalStorageChanged,
+  isTypeOfCustomEvent,
 } from './local-storage-events';
 import { useEffect, useState, useCallback } from 'react';
 
 /**
  * This exists for trying to serialize the value back to JSON.
  * If it cannot serialize it, then it was a string value given.
- * 
+ *
  * @param value the value you wish to try to parse
  */
 function tryParse(value: string) {
@@ -58,10 +58,10 @@ export function useLocalStorage<TValue = string>(
       : tryParse(localStorage.getItem(key)!)
   );
 
-  const onLocalStorageChange = (event: LocalStorageChanged<TValue> | StorageEvent) => {
+  const onLocalStorageChange = (event: CustomEvent | StorageEvent) => {
     // An event value can be of TValue when `localStorage.setItem` is called, or null when
     // `localStorage.removeItem` is called.
-    if (isTypeOfLocalStorageChanged(event)) {
+    if (isTypeOfCustomEvent(event)) {
       if (event.detail.key === key) {
         updateLocalState(event.detail.value);
       }
@@ -75,8 +75,8 @@ export function useLocalStorage<TValue = string>(
   useEffect(() => {
     // The custom storage event allows us to update our component
     // when a change occurs in localStorage outside of our component
-    const listener = (e: Event) => onLocalStorageChange(e as LocalStorageChanged<TValue>);
-    window.addEventListener(LocalStorageChanged.eventName, listener);
+    const listener = (e: Event) => onLocalStorageChange(e as CustomEvent<TValue>);
+    window.addEventListener(EVENT_NAME, listener);
 
     // The storage event only works in the context of other documents (eg. other browser tabs)
     window.addEventListener('storage', listener);
@@ -88,7 +88,7 @@ export function useLocalStorage<TValue = string>(
     }
 
     return () => {
-      window.removeEventListener(LocalStorageChanged.eventName, listener);
+      window.removeEventListener(EVENT_NAME, listener);
       window.removeEventListener('storage', listener);
     };
   }, [key]);

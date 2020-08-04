@@ -1,27 +1,6 @@
-import { LocalStorageChanged, writeStorage, deleteFromStorage } from '../src/local-storage-events';
+import { writeStorage, deleteFromStorage } from '../src/local-storage-events';
 
 describe('Module: local-storage-events', () => {
-    describe('LocalStorageChanged', () => {
-        it('is constructable with an object containing key and value', () => {
-            const key = 'foo';
-            const value = 'bar';
-            
-            const localStorageChanged = new LocalStorageChanged({ key, value });
-    
-            expect(localStorageChanged).toBeInstanceOf(LocalStorageChanged);
-            expect(localStorageChanged.detail.key).toBe(key);
-            expect(localStorageChanged.detail.value).toBe(value);
-        });
-    
-        it('uses the correct event name', () => {
-            const key = 'foo';
-            const value = 'bar';
-            
-            const localStorageChanged = new LocalStorageChanged({ key, value });
-            
-            expect(localStorageChanged.type).toBe(LocalStorageChanged.eventName);
-        });
-    });
 
     describe('writeStorage', () => {
         it('updates the localStorage', () => {
@@ -29,7 +8,7 @@ describe('Module: local-storage-events', () => {
             const value = 'bar';
 
             writeStorage(key, value);
-            
+
             expect(localStorage.getItem(key)).toBe(value);
         });
 
@@ -37,7 +16,7 @@ describe('Module: local-storage-events', () => {
             const key = 'foo';
             const value = 'bar';
             const onLocalStorageChanged = jest.fn();
-            window.addEventListener(LocalStorageChanged.eventName, () => {
+            window.addEventListener('onLocalStorageChange', () => {
                 onLocalStorageChanged();
             });
 
@@ -59,7 +38,7 @@ describe('Module: local-storage-events', () => {
             it('can write negative numbers', () => {
                 const key = 'onestepforward';
                 const value = -2;
-                
+
                 writeStorage(key, value);
 
                 expect(localStorage.getItem(key)).toBe(`${value}`);
@@ -91,7 +70,7 @@ describe('Module: local-storage-events', () => {
         describe('when deleting a value that does not exist', () => {
             it('is still null', () => {
                 const key = 'chocolate';
-                
+
                 expect(localStorage.getItem(key)).toBe(null);
                 expect(() => deleteFromStorage(key)).not.toThrow();
                 expect(localStorage.getItem(key)).toBe(null);
